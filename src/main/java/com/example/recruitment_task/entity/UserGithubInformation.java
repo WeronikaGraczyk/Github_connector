@@ -10,6 +10,5 @@ import java.util.List;
 @ToString
 @AllArgsConstructor
 public class UserGithubInformation {
-    private String userName;
     private List<RepositoryInformation> repositories;
 }

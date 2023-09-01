@@ -10,6 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RepositoryInformation {
-    private String name;
+    private String repositoryName;
+    private String username;
     private List<BranchInformation> branches;
 }

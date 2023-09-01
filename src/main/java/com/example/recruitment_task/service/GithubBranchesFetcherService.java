@@ -18,7 +18,7 @@ import java.util.Objects;
 
 @Service
 public class GithubBranchesFetcherService {
-    private RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate = new RestTemplate();
 
     @Value("${github.access.token}")
     private String token;
@@ -41,11 +41,11 @@ public class GithubBranchesFetcherService {
         if (repositoriesInfoWithFork != null) {
             for (RepositoryInformationWithFork repoInfo : repositoriesInfoWithFork) {
                 if (!repoInfo.isFork()) {
-                    repositoriesWithoutFork.add(new RepositoryInformation(repoInfo.getName(), getBranchesListFromRepository(repoInfo.getName(), userName)));
+                    repositoriesWithoutFork.add(new RepositoryInformation(repoInfo.getName(),userName, getBranchesListFromRepository(repoInfo.getName(), userName)));
                 }
             }
         }
-        return new UserGithubInformation(userName, repositoriesWithoutFork);
+        return new UserGithubInformation(repositoriesWithoutFork);
     }
 
     private List<BranchInformation> getBranchesListFromRepository(String repositoryName, String userName) {
