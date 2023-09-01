@@ -2,16 +2,13 @@ package com.example.recruitment_task.service;
 
 import com.example.recruitment_task.entity.BranchInformation;
 import com.example.recruitment_task.entity.RepositoryInformation;
+import com.example.recruitment_task.entity.RepositoryInformationWithFork;
 import com.example.recruitment_task.entity.UserGithubInformation;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -20,35 +17,35 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
-@NoArgsConstructor
-@AllArgsConstructor
-@Component
 public class GithubBranchesFetcherService {
-    private static final String GITHUB_API_URL = "https://api.github.com/";
     private RestTemplate restTemplate = new RestTemplate();
 
     @Value("${github.access.token}")
     private String token;
 
+    @Value("${github.api.url}")
+    private String githubAPIUrl;
+
     public UserGithubInformation fetchUserGithubInformation(String userName) {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
 
-        ResponseEntity<RepositoryInformation[]> response = restTemplate.exchange(
-                GITHUB_API_URL + "/users/{userName}/repos",
+        ResponseEntity<RepositoryInformationWithFork[]> response = restTemplate.exchange(
+                githubAPIUrl + "/users/{userName}/repos",
                 HttpMethod.GET,
                 new HttpEntity<>(headers),
-                RepositoryInformation[].class, userName);
-        RepositoryInformation[] repositories = response.getBody();
+                RepositoryInformationWithFork[].class, userName);
+        RepositoryInformationWithFork[] repositoriesInfoWithFork = response.getBody();
 
-        List<RepositoryInformation> withoutForkRespositories = new ArrayList<>();
-        for (RepositoryInformation repoInfo : repositories) {
-            if (!repoInfo.isFork()) {
-                repoInfo.setBranches(getBranchesListFromRepository(repoInfo.getName(), userName));
-                withoutForkRespositories.add(repoInfo);
+        List<RepositoryInformation> repositoriesWithoutFork = new ArrayList<>();
+        if (repositoriesInfoWithFork != null) {
+            for (RepositoryInformationWithFork repoInfo : repositoriesInfoWithFork) {
+                if (!repoInfo.isFork()) {
+                    repositoriesWithoutFork.add(new RepositoryInformation(repoInfo.getName(), getBranchesListFromRepository(repoInfo.getName(), userName)));
+                }
             }
         }
-        return new UserGithubInformation(userName, withoutForkRespositories);
+        return new UserGithubInformation(userName, repositoriesWithoutFork);
     }
 
     private List<BranchInformation> getBranchesListFromRepository(String repositoryName, String userName) {
@@ -56,24 +53,25 @@ public class GithubBranchesFetcherService {
         headers.setBearerAuth(token);
 
         ResponseEntity<BranchInformation[]> response = restTemplate.exchange(
-                GITHUB_API_URL + "/repos/{userName}/{repositoryName}/branches",
+                githubAPIUrl + "/repos/{userName}/{repositoryName}/branches",
                 HttpMethod.GET,
                 new HttpEntity<>(headers),
                 BranchInformation[].class, userName, repositoryName);
         BranchInformation[] branchInformations = response.getBody();
 
-        List<BranchInformation> branchInformationsResult = new ArrayList<>();
-        for (BranchInformation branchInfo : branchInformations) {
-            ResponseEntity<BranchInformation> responseCommitSha = restTemplate.exchange(
-                    GITHUB_API_URL + "/repos/{userName}/{repositoryName}/commits/{branchName}",
-                    HttpMethod.GET,
-                    new HttpEntity<>(headers),
-                    BranchInformation.class, userName, repositoryName, branchInfo.getName());
+        List<BranchInformation> branchInformationsResultWithFork = new ArrayList<>();
+        if (branchInformations != null) {
+            for (BranchInformation branchInfo : branchInformations) {
+                ResponseEntity<BranchInformation> responseCommitSha = restTemplate.exchange(
+                        githubAPIUrl + "/repos/{userName}/{repositoryName}/commits/{branchName}",
+                        HttpMethod.GET,
+                        new HttpEntity<>(headers),
+                        BranchInformation.class, userName, repositoryName, branchInfo.getName());
 
-            branchInformationsResult.add(new BranchInformation(branchInfo.getName(),
-                    Objects.requireNonNull(responseCommitSha.getBody()).getSha()));
+                branchInformationsResultWithFork.add(new BranchInformation(branchInfo.getName(),
+                        Objects.requireNonNull(responseCommitSha.getBody()).getSha()));
+            }
         }
-
-        return branchInformationsResult;
+        return branchInformationsResultWithFork;
     }
 }
