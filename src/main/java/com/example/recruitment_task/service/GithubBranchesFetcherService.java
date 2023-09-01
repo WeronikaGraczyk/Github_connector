@@ -59,7 +59,7 @@ public class GithubBranchesFetcherService {
                 BranchInformation[].class, userName, repositoryName);
         BranchInformation[] branchInformations = response.getBody();
 
-        List<BranchInformation> branchInformationsResultWithFork = new ArrayList<>();
+        List<BranchInformation> branchInformationsResult = new ArrayList<>();
         if (branchInformations != null) {
             for (BranchInformation branchInfo : branchInformations) {
                 ResponseEntity<BranchInformation> responseCommitSha = restTemplate.exchange(
@@ -68,10 +68,10 @@ public class GithubBranchesFetcherService {
                         new HttpEntity<>(headers),
                         BranchInformation.class, userName, repositoryName, branchInfo.getName());
 
-                branchInformationsResultWithFork.add(new BranchInformation(branchInfo.getName(),
+                branchInformationsResult.add(new BranchInformation(branchInfo.getName(),
                         Objects.requireNonNull(responseCommitSha.getBody()).getSha()));
             }
         }
-        return branchInformationsResultWithFork;
+        return branchInformationsResult;
     }
 }
