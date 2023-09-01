@@ -7,7 +7,7 @@ import lombok.*;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class BranchInformationWithFork {
+public class BranchInformation {
     private String name;
     private String sha;
 }

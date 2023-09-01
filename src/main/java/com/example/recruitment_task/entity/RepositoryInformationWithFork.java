@@ -9,8 +9,8 @@ import lombok.*;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class RepositoryInformation {
+public class RepositoryInformationWithFork {
     private String name;
-    private List<BranchInformationWithFork> branches;
+    private List<BranchInformation> branches;
     private boolean isFork;
 }

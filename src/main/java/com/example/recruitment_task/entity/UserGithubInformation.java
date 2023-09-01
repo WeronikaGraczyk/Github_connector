@@ -11,5 +11,5 @@ import lombok.ToString;
 @AllArgsConstructor
 public class UserGithubInformation {
     private String userName;
-    private List<RepositoryInformation> repositories;
+    private List<RepositoryInformationWithFork> repositories;
 }
