@@ -1,5 +1,6 @@
 package com.example.recruitment_task.controller;
 
+import com.example.recruitment_task.error.MessageErrorResponse;
 import com.example.recruitment_task.service.GithubBranchesFetcherService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
