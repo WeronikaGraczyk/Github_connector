@@ -1,4 +1,4 @@
-package com.example.recruitment_task.controller;
+package com.example.recruitment_task.error;
 
 import lombok.Getter;
 
