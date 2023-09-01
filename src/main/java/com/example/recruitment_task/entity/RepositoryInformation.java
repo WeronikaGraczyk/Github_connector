@@ -11,6 +11,6 @@ import lombok.*;
 @NoArgsConstructor
 public class RepositoryInformation {
     private String name;
-    private List<BranchInformation> branches;
+    private List<BranchInformationWithFork> branches;
     private boolean isFork;
 }
